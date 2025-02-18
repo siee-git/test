@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars:
+   usbfile: /etc/modprobe.d/usb-storage.conf
+  tasks:
+   - name: Kill every process using usbs
+     shell: 'lsblk -So NAME,TRAN | grep usb | cut -d" " -f 1 | xargs -I "{}" lsof -t /dev/{} | xargs -I "{}" kill -9 {}'
+     register: process_killed
+
+   - name: eject usbs
+     when: process_killed is success
+     shell: 'lsblk -So NAME,TRAN | grep usb | cut -d" " -f 1 | xargs -I "{}" eject /dev/{}'
+     register: usb_ejected
+
+   - name: copy /etc/modprobe.d/usb-storage.conf
+     when: usb_ejected is success
+     template: 
+        dest: "{{ usbfile }}"
+        src: /var/lib/awx/projects/files/usb-storage.conf.j2
+        owner: root
+        group: root
+        mode: 0644
+     register: storage_present
+
+   - name: disabling usb (modprobe uas 1 of 2)
+     when: storage_present is success
+     modprobe:
+        name: uas
+        state: absent
+     register: uas_absent
+
+   - name: disabling usb (modprobe usb-storage 2 of 2)
+     when: uas_absent is success
+     modprobe:
+        name: usb-storage
+        state: absent
