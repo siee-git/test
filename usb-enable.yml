@@ -1,0 +1,16 @@
+---
+- hosts: all
+  vars:
+   usbfile: /etc/modprobe.d/usb-storage.conf
+  tasks:
+   - name: delete /etc/modprobe.d/usb-storage.conf if present
+     file: 
+        path: "{{ usbfile }}"
+        state: absent
+     register: storage_deleted
+
+   - name: enabling usb 
+     when: storage_deleted is success
+     modprobe:
+        name: usb-storage
+        state: present
