@@ -8,4 +8,4 @@ collections:
 - name: ansible.posix
   version: 1.6.2
 - name: ansible.builtin
-  version: "1.0.0"
+  version: 2.18.2
