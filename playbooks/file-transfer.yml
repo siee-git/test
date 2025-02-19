@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+   - name: File transfer "{{ file }}" to "{{ path }}"
+     copy: 
+        dest: "{{ path }}"
+        src: "{{ file }}"
+        mode: "{{ file_perm }}"
+        owner: "{{ user_own }}"
+        group: "{{ group_own }}"
